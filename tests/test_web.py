@@ -235,3 +235,66 @@ def test_criterion_can_be_disabled(client: TestClient, settings: Settings) -> No
     conn = connect(settings.db_path)
     assert Repository(conn).active_criteria(round_id) == []
     conn.close()
+
+
+def test_kpi_page_is_empty_before_any_round(client: TestClient) -> None:
+    body = client.get("/kpi").text
+    assert "아직 완료된 라운드가 없습니다" in body
+
+
+def test_kpi_page_shows_selection_rate(client: TestClient) -> None:
+    round_id = _start_round(client)
+    for _ in range(50):
+        if "HX-Redirect" in client.get(f"/rounds/{round_id}/progress").headers:
+            break
+    client.post(f"/rounds/{round_id}/selection", data={"selected": ["10.1/1", "10.1/2"]})
+
+    body = client.get("/kpi").text
+    assert "평균 1차 선택률" in body
+    assert "67%" in body  # 3편 중 2편 선택
+    assert "목표 70%" in body
+
+
+def test_criterion_text_can_be_edited(client: TestClient, settings: Settings) -> None:
+    round_id = _start_round(client)
+    for _ in range(50):
+        if "HX-Redirect" in client.get(f"/rounds/{round_id}/progress").headers:
+            break
+    client.post(f"/rounds/{round_id}/selection", data={"selected": ["10.1/1", "10.1/2"]})
+
+    conn = connect(settings.db_path)
+    criterion_id = Repository(conn).list_criteria(round_id)[0]["id"]
+    conn.close()
+
+    client.post(
+        f"/rounds/{round_id}/criteria/{criterion_id}",
+        data={"action": "save", "text": "직접 고쳐 쓴 기준"},
+    )
+
+    conn = connect(settings.db_path)
+    repo = Repository(conn)
+    assert "직접 고쳐 쓴 기준" in repo.active_criteria(round_id)
+    assert repo.list_criteria(round_id)[0]["origin"] == "user_edited"
+    conn.close()
+
+
+def test_blank_criterion_text_is_ignored(client: TestClient, settings: Settings) -> None:
+    round_id = _start_round(client)
+    for _ in range(50):
+        if "HX-Redirect" in client.get(f"/rounds/{round_id}/progress").headers:
+            break
+    client.post(f"/rounds/{round_id}/selection", data={"selected": ["10.1/1", "10.1/2"]})
+
+    conn = connect(settings.db_path)
+    repo = Repository(conn)
+    criterion_id = repo.list_criteria(round_id)[0]["id"]
+    before = repo.list_criteria(round_id)[0]["text"]
+    conn.close()
+
+    client.post(
+        f"/rounds/{round_id}/criteria/{criterion_id}", data={"action": "save", "text": "   "}
+    )
+
+    conn = connect(settings.db_path)
+    assert Repository(conn).list_criteria(round_id)[0]["text"] == before
+    conn.close()

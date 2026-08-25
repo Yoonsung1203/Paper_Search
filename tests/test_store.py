@@ -190,3 +190,44 @@ def test_cost_breakdown_groups_by_stage(repo: Repository, round_input: RoundInpu
     assert rows["summarize"]["cost_usd"] == pytest.approx(0.025)
     # 비용 내림차순 정렬
     assert [r["stage"] for r in repo.cost_breakdown(rid)][0] == "summarize"
+
+
+def test_migration_v2_adds_completed_at(conn: sqlite3.Connection) -> None:
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(round)").fetchall()}
+    assert "completed_at" in cols
+    assert conn.execute("PRAGMA user_version").fetchone()[0] == 2
+
+
+def test_mark_completed_is_write_once(repo: Repository, round_input: RoundInput) -> None:
+    rid = repo.create_round(round_input)
+    repo.mark_completed(rid)
+    first = repo.conn.execute("SELECT completed_at FROM round WHERE id = ?", (rid,)).fetchone()[
+        "completed_at"
+    ]
+    repo.mark_completed(rid)
+    second = repo.conn.execute("SELECT completed_at FROM round WHERE id = ?", (rid,)).fetchone()[
+        "completed_at"
+    ]
+    assert first == second
+
+
+def test_kpi_rows_compute_selection_rate(repo: Repository, round_input: RoundInput) -> None:
+    rid = repo.create_round(round_input)
+    repo.attach_papers(rid, [make_paper(doi=f"10.1/{i}", title=f"P{i}") for i in range(4)])
+    repo.save_selection(rid, {"10.1/0", "10.1/1", "10.1/2"})
+    repo.mark_completed(rid)
+
+    row = repo.kpi_rows()[0]
+    assert row["candidates"] == 4
+    assert row["selected"] == 3
+    assert row["selection_rate"] == pytest.approx(0.75)
+    assert row["duration_min"] is not None
+
+
+def test_kpi_rate_is_none_before_selection(repo: Repository, round_input: RoundInput) -> None:
+    """선택 전 라운드를 0%로 계산하면 평균이 왜곡된다."""
+    rid = repo.create_round(round_input)
+    repo.attach_papers(rid, [make_paper()])
+    row = repo.kpi_rows()[0]
+    assert row["selection_rate"] is None
+    assert row["duration_min"] is None

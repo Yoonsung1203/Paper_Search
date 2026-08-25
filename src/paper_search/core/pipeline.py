@@ -178,6 +178,7 @@ class Pipeline:
                 round_id, "선택된 논문이 없어 관련도 점수순 리스트를 그대로 제시합니다."
             )
             self.repo.set_status(round_id, RoundStatus.DONE)
+            self.repo.mark_completed(round_id)
             return self.repo.load_result(round_id)
 
         criteria = await infer_criteria(self.deps.llm, selected, rejected)
@@ -192,6 +193,7 @@ class Pipeline:
         )
         self.repo.save_ranks(round_id, [sp.paper.doi for sp in ranked])
         self.repo.set_status(round_id, RoundStatus.DONE)
+        self.repo.mark_completed(round_id)
         return self.repo.load_result(round_id)
 
     # ------------------------------------------------------------ 보조
