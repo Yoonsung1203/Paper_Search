@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src tests
+
+      - name: Format check (ruff)
+        run: ruff format --check src tests
+
+      - name: Type check (mypy)
+        run: mypy
+
+      # network 마킹된 테스트는 실제 외부 API를 치므로 CI에서 제외된다
+      # (pyproject.toml의 addopts = "-m 'not network'")
+      - name: Test
+        run: pytest -v
