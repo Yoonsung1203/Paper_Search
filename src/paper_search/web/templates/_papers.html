@@ -1,0 +1,49 @@
+{% macro paper_card(sp, selectable) %}
+<div class="panel" style="padding:16px 18px">
+  <div style="display:flex;gap:12px;align-items:flex-start">
+    {% if selectable %}
+      <input type="checkbox" name="selected" value="{{ sp.paper.doi }}"
+             id="p-{{ loop_index }}" style="margin-top:5px;width:17px;height:17px;flex:none">
+    {% endif %}
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
+        {% if sp.relevance %}<span class="chip">관련도 {{ sp.relevance.score }}</span>{% endif %}
+        {% if sp.paper.is_preprint %}<span class="chip grey">preprint</span>{% endif %}
+        {% if sp.metric %}
+          <span class="chip grey">{{ sp.metric.display() }}</span>
+        {% elif not sp.paper.is_preprint %}
+          <span class="chip grey">지표 미확인</span>
+        {% endif %}
+      </div>
+      <div style="font-weight:600;line-height:1.45">
+        <a href="{{ sp.paper.url }}" target="_blank" rel="noopener">{{ sp.paper.title }}</a>
+      </div>
+      <div class="muted" style="margin:3px 0 8px">
+        {{ sp.paper.journal or '저널 미상' }}
+        {% if sp.paper.published_at %} · {{ sp.paper.published_at }}{% endif %}
+        {% if sp.paper.authors %} · {{ sp.paper.authors[:3]|join(', ') }}{% if sp.paper.authors|length > 3 %} 외{% endif %}{% endif %}
+      </div>
+
+      {% if sp.summary %}
+        <ul style="margin:0 0 8px;padding-left:18px">
+          {% for line in sp.summary.summary %}<li>{{ line }}</li>{% endfor %}
+        </ul>
+        <div class="muted" style="font-size:13px">
+          <strong>차별성:</strong> {{ sp.summary.novelty_claim or '판단 보류' }}
+          <span class="chip grey">{{ sp.summary.novelty_category }}</span>
+          <span class="chip grey">확신 {{ sp.summary.novelty_confidence }}</span>
+          <span class="chip grey">근거: {{ '전문' if sp.summary.basis == 'fulltext' else '초록' }}</span>
+        </div>
+      {% elif sp.paper.abstract and not (sp.relevance and sp.relevance.evidence) %}
+        <p class="muted" style="margin:0 0 6px">{{ sp.paper.abstract[:280] }}{% if sp.paper.abstract|length > 280 %}…{% endif %}</p>
+      {% endif %}
+
+      {% if sp.relevance and sp.relevance.evidence %}
+        <div class="muted" style="font-size:12.5px;margin-top:6px">
+          근거: {% for e in sp.relevance.evidence %}“{{ e }}”{% if not loop.last %} · {% endif %}{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endmacro %}

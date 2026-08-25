@@ -176,3 +176,17 @@ def test_connect_creates_parent_directory(tmp_path) -> None:  # type: ignore[no-
     conn = connect(db)
     conn.close()
     assert db.exists()
+
+
+def test_cost_breakdown_groups_by_stage(repo: Repository, round_input: RoundInput) -> None:
+    rid = repo.create_round(round_input)
+    repo.record_llm_call(rid, "score", "claude-opus-5", 100, 20, 0.001, cache_read_tokens=500)
+    repo.record_llm_call(rid, "score", "claude-opus-5", 100, 20, 0.001, cache_read_tokens=500)
+    repo.record_llm_call(rid, "summarize", "claude-opus-5", 3000, 400, 0.025)
+
+    rows = {r["stage"]: r for r in repo.cost_breakdown(rid)}
+    assert rows["score"]["calls"] == 2
+    assert rows["score"]["cache_read_tokens"] == 1000
+    assert rows["summarize"]["cost_usd"] == pytest.approx(0.025)
+    # 비용 내림차순 정렬
+    assert [r["stage"] for r in repo.cost_breakdown(rid)][0] == "summarize"

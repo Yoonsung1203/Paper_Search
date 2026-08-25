@@ -424,6 +424,21 @@ class Repository:
         row = self.conn.execute("SELECT cost_usd FROM round WHERE id = ?", (round_id,)).fetchone()
         return float(row["cost_usd"]) if row else 0.0
 
+    def cost_breakdown(self, round_id: int) -> list[sqlite3.Row]:
+        """단계별 토큰·비용. T2-9(비용 실측)의 입력이다."""
+        return list(
+            self.conn.execute(
+                """SELECT stage, model, COUNT(*) AS calls,
+                          SUM(input_tokens) AS input_tokens,
+                          SUM(output_tokens) AS output_tokens,
+                          SUM(cache_read_tokens) AS cache_read_tokens,
+                          SUM(cost_usd) AS cost_usd
+                   FROM llm_call WHERE round_id = ?
+                   GROUP BY stage, model ORDER BY cost_usd DESC""",
+                (round_id,),
+            ).fetchall()
+        )
+
     def cache_hit_ratio(self, round_id: int) -> float:
         """프롬프트 캐시가 실제로 적중하는지 확인하기 위한 지표 (계획 §7.2)."""
         row = self.conn.execute(

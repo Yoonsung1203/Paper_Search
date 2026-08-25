@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="panel" method="post" action="/rounds">
+  <div class="field">
+    <label for="keywords">관심 주제 · 키워드 <span class="muted">(쉼표로 구분)</span></label>
+    <textarea id="keywords" name="keywords" placeholder="single-cell, spatial transcriptomics"></textarea>
+  </div>
+  <div class="field">
+    <label for="authors">관심 연구자 <span class="muted">(선택, 쉼표로 구분)</span></label>
+    <input type="text" id="authors" name="authors" placeholder="Kim S, Regev A">
+  </div>
+  <div class="row">
+    <div class="field">
+      <label for="date_from">시작일</label>
+      <input type="date" id="date_from" name="date_from" value="{{ default_from }}">
+    </div>
+    <div class="field">
+      <label for="date_to">종료일</label>
+      <input type="date" id="date_to" name="date_to" value="{{ default_to }}">
+    </div>
+    <div class="field">
+      <label for="impact_threshold">저널 임팩트 하한 <span class="muted">(선택)</span></label>
+      <input type="number" step="0.1" id="impact_threshold" name="impact_threshold" placeholder="10">
+    </div>
+  </div>
+  <div class="field">
+    <label><input type="checkbox" name="include_preprints" value="1" checked> 프리프린트 포함
+      <span class="muted">— 프리프린트는 저널 지표가 없어 임팩트 필터를 적용하지 않습니다</span>
+    </label>
+  </div>
+  <button type="submit">스크리닝 시작</button>
+</form>
+
+{% if rounds %}
+<div class="panel">
+  <table>
+    <thead><tr><th>#</th><th>시각</th><th>키워드</th><th>상태</th><th>비용</th></tr></thead>
+    <tbody>
+    {% for r in rounds %}
+      <tr>
+        <td><a href="/rounds/{{ r['id'] }}">{{ r['id'] }}</a></td>
+        <td class="muted">{{ r['created_at'][:16].replace('T', ' ') }}</td>
+        <td>{{ r['keywords'] }}</td>
+        <td>{{ status_label.get(r['status'], r['status']) }}</td>
+        <td class="muted">${{ '%.3f'|format(r['cost_usd']) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,9 @@
+<div id="progress" class="panel">
+  <div style="display:flex;align-items:center;gap:10px">
+    {% if running %}<span class="chip">진행 중</span>{% endif %}
+    <strong>{{ status_label }}</strong>
+  </div>
+  <p class="muted" style="margin:10px 0 0">
+    후보 {{ counted }}건 · 누적 비용 ${{ '%.3f'|format(cost) }}
+  </p>
+</div>
