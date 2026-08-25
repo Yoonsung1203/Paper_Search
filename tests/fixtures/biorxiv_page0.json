@@ -1,0 +1,53 @@
+{
+  "messages": [{"status": "ok", "interval": "2026-08-18/2026-08-25", "cursor": "0", "count": 3, "total": 3}],
+  "collection": [
+    {
+      "doi": "10.1101/2026.08.19.611111",
+      "title": "A single-cell spatial transcriptomic atlas of the human cortex",
+      "authors": "Kim, S.; Lee, J.; Park, H.",
+      "author_corresponding": "Sunhee Kim",
+      "author_corresponding_institution": "Seoul National University",
+      "date": "2026-08-19",
+      "version": "1",
+      "type": "new results",
+      "license": "cc_by",
+      "category": "genomics",
+      "jatsxml": "https://www.biorxiv.org/content/early/2026/08/19/2026.08.19.611111.source.xml",
+      "abstract": "Spatial organisation of cortical cell types is poorly mapped. We profiled 2.4 million cells.",
+      "published": "10.1038/s41586-026-00001-0",
+      "server": "biorxiv"
+    },
+    {
+      "doi": "10.1101/2026.08.21.622222",
+      "title": "Deep learning inference of neuronal connectivity from calcium imaging",
+      "authors": "Choi, M.; Yun, D.",
+      "author_corresponding": "Minjae Choi",
+      "author_corresponding_institution": "KAIST",
+      "date": "2026-08-21",
+      "version": "2",
+      "type": "new results",
+      "license": "cc_by_nc",
+      "category": "neuroscience",
+      "jatsxml": "https://www.biorxiv.org/content/early/2026/08/21/2026.08.21.622222.source.xml",
+      "abstract": "We train a transformer to infer synaptic connectivity from two-photon calcium imaging.",
+      "published": "NA",
+      "server": "biorxiv"
+    },
+    {
+      "doi": "10.1101/2026.08.22.633333",
+      "title": "Soil fungal networks respond to drought in alpine meadows",
+      "authors": "Novak, P.",
+      "author_corresponding": "Petra Novak",
+      "author_corresponding_institution": "ETH Zurich",
+      "date": "2026-08-22",
+      "version": "1",
+      "type": "new results",
+      "license": "cc_by",
+      "category": "ecology",
+      "jatsxml": "https://www.biorxiv.org/content/early/2026/08/22/2026.08.22.633333.source.xml",
+      "abstract": "Drought reshapes mycorrhizal network topology across alpine soil plots.",
+      "published": "NA",
+      "server": "biorxiv"
+    }
+  ]
+}

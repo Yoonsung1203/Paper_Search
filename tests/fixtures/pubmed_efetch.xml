@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation Status="Publisher" Owner="NLM">
+      <PMID Version="1">40001111</PMID>
+      <Article PubModel="Print-Electronic">
+        <Journal>
+          <ISSN IssnType="Electronic">1476-4687</ISSN>
+          <JournalIssue CitedMedium="Internet">
+            <PubDate><Year>2026</Year><Month>Aug</Month><Day>20</Day></PubDate>
+          </JournalIssue>
+          <Title>Nature</Title>
+          <ISOAbbreviation>Nature</ISOAbbreviation>
+        </Journal>
+        <ArticleTitle>A single-cell spatial transcriptomic atlas of the human cortex</ArticleTitle>
+        <Abstract>
+          <AbstractText Label="BACKGROUND">Spatial organisation of cortical cell types is poorly mapped.</AbstractText>
+          <AbstractText Label="RESULTS">We profiled 2.4 million cells across 12 donors.</AbstractText>
+        </Abstract>
+        <AuthorList CompleteYN="Y">
+          <Author ValidYN="Y"><LastName>Kim</LastName><ForeName>Sunhee</ForeName><Initials>S</Initials></Author>
+          <Author ValidYN="Y"><LastName>Lee</LastName><ForeName>Jiwon</ForeName><Initials>J</Initials></Author>
+        </AuthorList>
+        <ArticleDate DateType="Electronic"><Year>2026</Year><Month>08</Month><Day>20</Day></ArticleDate>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <ArticleIdList>
+        <ArticleId IdType="pubmed">40001111</ArticleId>
+        <ArticleId IdType="doi">10.1038/s41586-026-00001-0</ArticleId>
+      </ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+
+  <PubmedArticle>
+    <MedlineCitation Status="Publisher" Owner="NLM">
+      <PMID Version="1">40002222</PMID>
+      <Article PubModel="Electronic">
+        <Journal>
+          <JournalIssue CitedMedium="Internet">
+            <PubDate><MedlineDate>2026 Aug-Sep</MedlineDate></PubDate>
+          </JournalIssue>
+          <Title>Cell Reports Methods</Title>
+        </Journal>
+        <ArticleTitle>Benchmarking deconvolution methods for spatial transcriptomics</ArticleTitle>
+        <Abstract>
+          <AbstractText>We benchmark eleven deconvolution methods on matched datasets.</AbstractText>
+        </Abstract>
+        <AuthorList CompleteYN="Y">
+          <Author ValidYN="Y"><CollectiveName>The Spatial Benchmarking Consortium</CollectiveName></Author>
+        </AuthorList>
+        <ELocationID EIdType="doi" ValidYN="Y">10.1016/j.crmeth.2026.100999</ELocationID>
+      </Article>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList><ArticleId IdType="pubmed">40002222</ArticleId></ArticleIdList></PubmedData>
+  </PubmedArticle>
+
+  <PubmedArticle>
+    <MedlineCitation Status="Publisher" Owner="NLM">
+      <PMID Version="1">40003333</PMID>
+      <Article PubModel="Electronic">
+        <Journal>
+          <ISSN IssnType="Print">0000-0000</ISSN>
+          <Title>Journal Without DOI</Title>
+        </Journal>
+        <ArticleTitle>This record has no DOI and must be dropped</ArticleTitle>
+        <Abstract><AbstractText>No DOI here.</AbstractText></Abstract>
+      </Article>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList><ArticleId IdType="pubmed">40003333</ArticleId></ArticleIdList></PubmedData>
+  </PubmedArticle>
+</PubmedArticleSet>

@@ -1,0 +1,41 @@
+{
+  "_comment": "bioRxiv/medRxiv는 키워드 검색을 지원하지 않아 카테고리로 수집 범위를 좁힌다 (build_plan §4.1). 각 카테고리에 매칭 힌트 단어를 붙여 사용자 키워드를 카테고리로 매핑한다.",
+  "biorxiv": {
+    "animal behavior and cognition": ["behavior", "behaviour", "cognition", "learning", "memory"],
+    "biochemistry": ["enzyme", "protein", "kinase", "metabolite", "biochemical"],
+    "bioengineering": ["bioengineering", "biomaterial", "tissue engineering", "device"],
+    "bioinformatics": ["bioinformatics", "algorithm", "pipeline", "computational", "deep learning", "machine learning", "model"],
+    "biophysics": ["biophysics", "cryo-em", "structure", "molecular dynamics", "folding"],
+    "cancer biology": ["cancer", "tumor", "tumour", "oncology", "carcinoma", "metastasis", "leukemia"],
+    "cell biology": ["cell", "organelle", "mitochondria", "autophagy", "cytoskeleton"],
+    "developmental biology": ["development", "embryo", "organoid", "differentiation", "morphogenesis"],
+    "ecology": ["ecology", "ecosystem", "biodiversity", "species", "habitat"],
+    "epidemiology": ["epidemiology", "outbreak", "incidence", "prevalence", "cohort"],
+    "evolutionary biology": ["evolution", "phylogen", "selection", "adaptation", "population genetics"],
+    "genetics": ["genetic", "mutation", "variant", "gwas", "heritability", "allele"],
+    "genomics": ["genome", "genomics", "sequencing", "transcriptomics", "single-cell", "scrna", "epigenom", "chromatin", "spatial transcriptomics"],
+    "immunology": ["immune", "immunology", "t cell", "b cell", "antibody", "inflammation", "macrophage"],
+    "microbiology": ["bacteria", "microbiome", "virus", "viral", "pathogen", "antibiotic", "fungal"],
+    "molecular biology": ["rna", "dna", "transcription", "translation", "splicing", "crispr"],
+    "neuroscience": ["neuro", "brain", "neuron", "synap", "cortex", "hippocampus", "glia", "axon"],
+    "pathology": ["pathology", "histolog", "lesion", "biopsy"],
+    "pharmacology and toxicology": ["drug", "pharmacolog", "toxicity", "inhibitor", "compound"],
+    "physiology": ["physiolog", "metabolism", "homeostasis", "circadian"],
+    "plant biology": ["plant", "arabidopsis", "photosynthesis", "root", "crop"],
+    "synthetic biology": ["synthetic biology", "engineered", "circuit", "biosensor"],
+    "systems biology": ["systems biology", "network", "multi-omics", "regulatory network"],
+    "zoology": ["zoology", "animal", "insect", "fish", "bird"]
+  },
+  "medrxiv": {
+    "cardiovascular medicine": ["cardiac", "cardiovascular", "heart", "hypertension"],
+    "epidemiology": ["epidemiology", "outbreak", "incidence", "prevalence", "cohort"],
+    "genetic and genomic medicine": ["genome", "genomic", "variant", "sequencing", "gwas"],
+    "health informatics": ["ehr", "informatics", "machine learning", "prediction model"],
+    "infectious diseases": ["infection", "virus", "viral", "bacteria", "vaccine", "antibiotic"],
+    "neurology": ["neuro", "brain", "stroke", "dementia", "alzheimer", "parkinson"],
+    "oncology": ["cancer", "tumor", "tumour", "oncology", "chemotherapy"],
+    "psychiatry and clinical psychology": ["depression", "psychiatry", "anxiety", "schizophrenia"],
+    "public and global health": ["public health", "global health", "policy", "disparit"],
+    "respiratory medicine": ["lung", "respiratory", "asthma", "copd"]
+  }
+}
