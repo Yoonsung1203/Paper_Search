@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import UTC, date, datetime
+from typing import Any
 
 from paper_search.models import (
     Confidence,
@@ -81,6 +82,14 @@ class Repository:
 
     def set_status(self, round_id: int, status: RoundStatus) -> None:
         self.conn.execute("UPDATE round SET status = ? WHERE id = ?", (status.value, round_id))
+        self.conn.commit()
+
+    def mark_completed(self, round_id: int) -> None:
+        """최종 리스트가 나온 시각. 이미 기록돼 있으면 덮어쓰지 않는다."""
+        self.conn.execute(
+            "UPDATE round SET completed_at = ? WHERE id = ? AND completed_at IS NULL",
+            (_now(), round_id),
+        )
         self.conn.commit()
 
     def get_status(self, round_id: int) -> RoundStatus | None:
@@ -448,6 +457,50 @@ class Repository:
         ).fetchone()
         total = (row["inp"] or 0) + (row["cached"] or 0)
         return (row["cached"] or 0) / total if total else 0.0
+
+    # ------------------------------------------------------------ KPI
+
+    def kpi_rows(self, limit: int = 50) -> list[dict[str, Any]]:
+        """라운드별 KPI (PRD §9).
+
+        선택률만 보면 리스트를 짧게 만드는 방향으로 왜곡되므로, 최종 건수와 함께 낸다.
+        """
+        rows = self.conn.execute(
+            """SELECT r.id, r.created_at, r.completed_at, r.status, r.cost_usd, r.keywords,
+                      COUNT(rp.doi) AS candidates,
+                      SUM(CASE WHEN s.selected = 1 THEN 1 ELSE 0 END) AS selected,
+                      COUNT(s.doi) AS reviewed
+               FROM round r
+               LEFT JOIN round_paper rp ON rp.round_id = r.id
+               LEFT JOIN selection s ON s.round_id = r.id AND s.doi = rp.doi
+               GROUP BY r.id ORDER BY r.id DESC LIMIT ?""",
+            (limit,),
+        ).fetchall()
+
+        out: list[dict[str, Any]] = []
+        for row in rows:
+            reviewed = row["reviewed"] or 0
+            selected = row["selected"] or 0
+            duration: float | None = None
+            if row["completed_at"]:
+                started = datetime.fromisoformat(row["created_at"])
+                finished = datetime.fromisoformat(row["completed_at"])
+                duration = (finished - started).total_seconds() / 60
+            out.append(
+                {
+                    "id": row["id"],
+                    "created_at": row["created_at"],
+                    "status": row["status"],
+                    "keywords": json.loads(row["keywords"]),
+                    "candidates": row["candidates"] or 0,
+                    "selected": selected,
+                    "selection_rate": (selected / reviewed) if reviewed else None,
+                    "duration_min": duration,
+                    "cost_usd": row["cost_usd"],
+                    "cache_hit_ratio": self.cache_hit_ratio(row["id"]),
+                }
+            )
+        return out
 
     # ------------------------------------------------------------ 결과 조립
 

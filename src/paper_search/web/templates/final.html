@@ -18,11 +18,13 @@
   <p class="muted" style="margin:4px 0 12px">다음 라운드의 관련도 점수화에 반영됩니다. 맞지 않는 기준은 끄십시오.</p>
   {% for c in criteria_rows %}
     <form method="post" action="/rounds/{{ result.round_id }}/criteria/{{ c['id'] }}"
-          style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)">
-      <span style="flex:1{% if not c['active'] %};opacity:.45;text-decoration:line-through{% endif %}">{{ c['text'] }}</span>
+          style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)">
+      <input type="text" name="text" value="{{ c['text'] }}"
+             style="flex:1{% if not c['active'] %};opacity:.45{% endif %}">
       {% if c['origin'] == 'user_edited' %}<span class="chip grey">수정됨</span>{% endif %}
+      <button class="ghost" type="submit" name="action" value="save">저장</button>
       <input type="hidden" name="active" value="{{ '' if c['active'] else '1' }}">
-      <button class="ghost" type="submit">{{ '끄기' if c['active'] else '켜기' }}</button>
+      <button class="ghost" type="submit" name="action" value="toggle">{{ '끄기' if c['active'] else '켜기' }}</button>
     </form>
   {% endfor %}
 </div>

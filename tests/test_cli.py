@@ -48,7 +48,7 @@ def _mock_all(load_fixture) -> None:  # type: ignore[no-untyped-def]
 def test_init_db(isolated_env: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["init-db"]) == 0
     assert isolated_env.exists()
-    assert "스키마 버전 1" in capsys.readouterr().out
+    assert "스키마 버전 2" in capsys.readouterr().out
 
 
 def test_search_requires_keyword_or_author(capsys: pytest.CaptureFixture[str]) -> None:

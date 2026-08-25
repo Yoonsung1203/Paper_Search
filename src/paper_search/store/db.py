@@ -98,7 +98,12 @@ CREATE INDEX idx_criteria_round ON criteria(round_id);
 CREATE INDEX idx_llm_call_round ON llm_call(round_id);
 """
 
-MIGRATIONS: list[str] = [SCHEMA_V1]
+# v2: KPI 측정을 위한 완료 시각. 라운드 소요 시간(PRD §9)을 재려면 종료 시각이 필요하다.
+SCHEMA_V2 = """
+ALTER TABLE round ADD COLUMN completed_at TEXT;
+"""
+
+MIGRATIONS: list[str] = [SCHEMA_V1, SCHEMA_V2]
 
 
 def migrate(conn: sqlite3.Connection) -> int:

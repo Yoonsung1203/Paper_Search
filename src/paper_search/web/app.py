@@ -40,6 +40,9 @@ RUNNING_STATUSES = {
     RoundStatus.RERANKING,
 }
 
+# PRD §9의 목표치. 화면에서 달성 여부를 색으로 구분한다.
+TARGETS = {"selection_rate": 0.70, "selected": 15, "duration_min": 15.0}
+
 STATUS_LABEL = {
     RoundStatus.CREATED: "준비 중",
     RoundStatus.SEARCHING: "논문 검색 중",
@@ -225,12 +228,45 @@ def create_app(
         return RedirectResponse(f"/rounds/{round_id}", status_code=303)
 
     @app.post("/rounds/{round_id}/criteria/{criterion_id}")
-    async def toggle_criterion(round_id: int, criterion_id: int, active: str = Form("")) -> Any:
+    async def edit_criterion(
+        round_id: int,
+        criterion_id: int,
+        active: str = Form(""),
+        text: str = Form(""),
+        action: str = Form("toggle"),
+    ) -> Any:
         conn, repo = open_repo()
         try:
-            repo.set_criterion_active(criterion_id, bool(active))
+            if action == "save" and text.strip():
+                repo.update_criterion_text(criterion_id, text.strip())
+            elif action == "delete":
+                repo.set_criterion_active(criterion_id, False)
+            else:
+                repo.set_criterion_active(criterion_id, bool(active))
         finally:
             conn.close()
         return RedirectResponse(f"/rounds/{round_id}", status_code=303)
+
+    @app.get("/kpi", response_class=HTMLResponse)
+    async def kpi(request: Request) -> Any:
+        """PRD §9의 지표를 라운드별로 보여준다.
+
+        선택률만 최적화하면 리스트를 짧게 만드는 방향으로 왜곡되므로,
+        최종 건수를 반드시 나란히 놓는다.
+        """
+        conn, repo = open_repo()
+        rows = repo.kpi_rows()
+        conn.close()
+
+        done = [r for r in rows if r["selection_rate"] is not None]
+        summary = {
+            "rounds": len(done),
+            "avg_rate": (sum(r["selection_rate"] for r in done) / len(done)) if done else None,
+            "avg_selected": (sum(r["selected"] for r in done) / len(done)) if done else None,
+            "avg_cost": (sum(r["cost_usd"] for r in done) / len(done)) if done else None,
+        }
+        return templates.TemplateResponse(
+            request, "kpi.html", {"rows": rows, "summary": summary, "targets": TARGETS}
+        )
 
     return app

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="panel">
+  <strong>KPI</strong>
+  <p class="muted" style="margin:4px 0 0">
+    선택률만 보면 리스트를 짧게 만드는 쪽으로 왜곡되므로, 최종 건수를 나란히 봅니다.
+  </p>
+</div>
+
+{% if summary.rounds %}
+<div class="panel" style="display:flex;gap:28px;flex-wrap:wrap">
+  <div>
+    <div class="muted" style="font-size:12px">평균 1차 선택률</div>
+    <div style="font-size:22px;font-weight:700;color:{{ 'var(--ok)' if summary.avg_rate >= targets.selection_rate else 'var(--warn)' }}">
+      {{ '%.0f'|format(summary.avg_rate * 100) }}%
+    </div>
+    <div class="muted" style="font-size:12px">목표 {{ '%.0f'|format(targets.selection_rate * 100) }}%</div>
+  </div>
+  <div>
+    <div class="muted" style="font-size:12px">평균 선택 건수</div>
+    <div style="font-size:22px;font-weight:700;color:{{ 'var(--ok)' if summary.avg_selected >= targets.selected else 'var(--warn)' }}">
+      {{ '%.1f'|format(summary.avg_selected) }}
+    </div>
+    <div class="muted" style="font-size:12px">목표 {{ targets.selected }}건</div>
+  </div>
+  <div>
+    <div class="muted" style="font-size:12px">평균 라운드 비용</div>
+    <div style="font-size:22px;font-weight:700">${{ '%.2f'|format(summary.avg_cost) }}</div>
+    <div class="muted" style="font-size:12px">완료 라운드 {{ summary.rounds }}회</div>
+  </div>
+</div>
+{% else %}
+<div class="panel muted">아직 완료된 라운드가 없습니다.</div>
+{% endif %}
+
+<div class="panel">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>키워드</th><th>후보</th><th>선택</th><th>선택률</th>
+        <th>소요</th><th>비용</th><th>캐시</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><a href="/rounds/{{ r.id }}">{{ r.id }}</a></td>
+        <td class="muted">{{ r.keywords|join(', ') }}</td>
+        <td>{{ r.candidates }}</td>
+        <td {% if r.selected >= targets.selected %}style="color:var(--ok);font-weight:600"{% endif %}>
+          {{ r.selected }}
+        </td>
+        <td>
+          {% if r.selection_rate is none %}<span class="muted">—</span>
+          {% else %}
+            <span {% if r.selection_rate >= targets.selection_rate %}style="color:var(--ok);font-weight:600"{% endif %}>
+              {{ '%.0f'|format(r.selection_rate * 100) }}%
+            </span>
+          {% endif %}
+        </td>
+        <td class="muted">
+          {% if r.duration_min is none %}—{% else %}{{ '%.0f'|format(r.duration_min) }}분{% endif %}
+        </td>
+        <td class="muted">${{ '%.3f'|format(r.cost_usd) }}</td>
+        <td class="muted">{{ '%.0f'|format(r.cache_hit_ratio * 100) }}%</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
