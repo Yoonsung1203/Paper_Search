@@ -51,5 +51,5 @@ paper-search costs 1
 | M0 | 프로젝트 골격, 설정, 도메인 모델, SQLite, CI | 완료 |
 | M1 | 검색 파이프라인 (PubMed / bioRxiv / Crossref, 중복 제거) | 완료 |
 | M2 | LLM 스크리닝 + 웹 UI (Human gate) | 완료 (비용 실측 T2-9 보류) |
-| M3 | 저널 임팩트 지표, 차별성 검증 노출 | 예정 |
+| M3 | 저널 임팩트 지표, 차별성 검증 노출 | 완료 |
 | M4 | 선택 기준 추론 및 재랭킹 | 예정 |

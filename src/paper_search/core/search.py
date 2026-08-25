@@ -60,17 +60,11 @@ class SearchService:
         enricher: CrossrefEnricher | None = None,
     ) -> None:
         self.settings = settings
-        cache = DiskCache(settings.cache_dir)
+        self._client = client
+        self._cache = DiskCache(settings.cache_dir)
 
         def fetch(name: str, rate: float, ttl: float | None) -> FetchClient:
-            return FetchClient(
-                client,
-                source=name,
-                bucket=AsyncTokenBucket(rate=rate),
-                cache=cache,
-                cache_ttl=ttl,
-                backoff_base=settings.backoff_base,
-            )
+            return self.fetch_for(name, rate=rate, ttl=ttl)
 
         # NCBI: 키 없으면 3 req/s, 키 발급 시 10 req/s
         ncbi_rate = 10.0 if settings.ncbi_api_key else 3.0
@@ -81,6 +75,17 @@ class SearchService:
             BiorxivSource(fetch("medrxiv", 2.0, DAY), server="medrxiv"),
         ]
         self.enricher = enricher or CrossrefEnricher(fetch("crossref", 5.0, 30 * DAY))
+
+    def fetch_for(self, name: str, *, rate: float, ttl: float | None) -> FetchClient:
+        """같은 HTTP 클라이언트·캐시를 공유하는 소스별 fetch 계층을 만든다."""
+        return FetchClient(
+            self._client,
+            source=name,
+            bucket=AsyncTokenBucket(rate=rate),
+            cache=self._cache,
+            cache_ttl=ttl,
+            backoff_base=self.settings.backoff_base,
+        )
 
     async def search(self, spec: RoundInput) -> SearchOutcome:
         ctx = SearchContext(spec=spec, max_results=self.settings.max_candidates)

@@ -19,10 +19,12 @@ import httpx
 from anthropic import AsyncAnthropic
 
 from paper_search.config import Settings
+from paper_search.core.impact import ImpactFilter
 from paper_search.core.search import SearchService
 from paper_search.llm.client import LlmClient
 from paper_search.llm.stages import infer_criteria, score_papers, summarize_papers
 from paper_search.models import RoundResult, RoundStatus
+from paper_search.sources.openalex import OpenAlexMetrics
 from paper_search.store import Repository
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ class PipelineDeps:
 
     search: SearchService
     llm: LlmClient
+    impact: ImpactFilter | None = None
 
 
 def build_deps(
@@ -56,14 +59,20 @@ def build_deps(
     ) -> None:
         repo.record_llm_call(round_id, stage, model, input_tokens, output_tokens, cost, cache_read)
 
+    search = SearchService(http_client, settings)
+    metrics = OpenAlexMetrics(
+        search.fetch_for("openalex", rate=5.0, ttl=30 * 24 * 60 * 60),
+        mailto=settings.contact_email,
+    )
     return PipelineDeps(
-        search=SearchService(http_client, settings),
+        search=search,
         llm=LlmClient(
             anthropic_client,
             concurrency=settings.llm_concurrency,
             cost_cap_usd=settings.cost_cap_usd,
             on_usage=on_usage,
         ),
+        impact=ImpactFilter(metrics, repo),
     )
 
 
@@ -89,6 +98,15 @@ class Pipeline:
         degraded |= bool(outcome.warnings)
 
         papers = outcome.papers
+
+        # --- 임팩트 임계값 (M3) ------------------------------------------
+        if self.deps.impact is not None and papers:
+            impact = await self.deps.impact.apply(papers, spec.impact_threshold)
+            papers = impact.papers
+            note = ImpactFilter.describe(impact, spec.impact_threshold)
+            if note:
+                self.repo.add_warning(round_id, note)
+
         self.repo.attach_papers(round_id, papers)
         self._advise_on_volume(round_id, len(papers))
 

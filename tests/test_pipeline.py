@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -220,3 +221,51 @@ async def test_unknown_round_raises(repo: Repository) -> None:
     llm = StubLlm({"score": _score_by_title})
     with pytest.raises(ValueError):
         await _pipeline(repo, _papers(1), llm).run_screening(999)
+
+
+class StubImpact:
+    """임팩트 필터 스텁 — 파이프라인이 필터를 실제로 호출하는지 본다."""
+
+    def __init__(self, keep: set[str], dropped: int = 0) -> None:
+        self.keep = keep
+        self.dropped = dropped
+        self.calls: list[float | None] = []
+
+    async def apply(self, papers: list[Paper], threshold: float | None) -> Any:
+        from paper_search.core.impact import ImpactOutcome
+
+        self.calls.append(threshold)
+        return ImpactOutcome(
+            papers=[p for p in papers if p.doi in self.keep],
+            dropped=self.dropped,
+            unknown=1,
+            preprints=0,
+        )
+
+
+async def test_impact_filter_runs_before_scoring(repo: Repository, round_input: RoundInput) -> None:
+    """저널 지표로 걸러낸 뒤에 점수화해야 LLM 비용을 아낀다."""
+    rid = repo.create_round(round_input)
+    llm = StubLlm({"score": _score_by_title, "summarize": SUMMARY})
+    impact = StubImpact(keep={"10.1/1", "10.1/2"}, dropped=3)
+
+    deps = PipelineDeps(
+        search=StubSearch(SearchOutcome(papers=_papers(5))),  # type: ignore[arg-type]
+        llm=llm,  # type: ignore[arg-type]
+        impact=impact,  # type: ignore[arg-type]
+    )
+    result = await Pipeline(repo, deps, Settings(summarize_top_n=2)).run_screening(rid)
+
+    assert impact.calls == [10.0], "라운드의 임계값이 그대로 전달되어야 한다"
+    assert len(result.papers) == 2
+    assert len(llm.calls) < 5, "걸러진 논문은 점수화하지 않는다"
+    assert any("임팩트 하한" in w for w in result.warnings)
+
+
+async def test_pipeline_works_without_impact_filter(
+    repo: Repository, round_input: RoundInput
+) -> None:
+    rid = repo.create_round(round_input)
+    llm = StubLlm({"score": _score_by_title, "summarize": SUMMARY})
+    result = await _pipeline(repo, _papers(3), llm).run_screening(rid)
+    assert len(result.papers) == 3
