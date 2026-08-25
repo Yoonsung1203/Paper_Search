@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "_papers.html" as papers %}
+{% block content %}
+
+<div class="panel" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+  <div>
+    <strong>1차 리스트 · {{ result.papers|length }}건</strong>
+    <span class="muted"> — {{ status_label }} · 비용 ${{ '%.3f'|format(result.cost_usd) }}</span>
+  </div>
+  <div class="muted">관심 있는 논문을 고른 뒤 아래 버튼을 누르십시오.</div>
+</div>
+
+{% for w in result.warnings %}<div class="warn">{{ w }}</div>{% endfor %}
+
+{% if not result.papers %}
+  <div class="panel">
+    <p>후보가 없습니다. 키워드를 완화하거나 기간을 넓혀 다시 시도해 보십시오.</p>
+    <a href="/"><button class="ghost" type="button">새 검색</button></a>
+  </div>
+{% else %}
+<form method="post" action="/rounds/{{ result.round_id }}/selection">
+  {% for sp in result.papers %}
+    {{ papers.paper_card(sp, true) }}
+  {% endfor %}
+  <div class="panel" style="position:sticky;bottom:16px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 20px rgba(0,0,0,.14)">
+    <button type="submit">선택 확정하고 최종 리스트 받기</button>
+    <span class="muted">아무것도 고르지 않으면 관련도 점수순 리스트를 그대로 받습니다.</span>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

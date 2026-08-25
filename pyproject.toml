@@ -35,7 +35,7 @@ paper-search = "paper_search.__main__:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-paper_search = ["web/templates/*.html", "web/static/*", "data/*.json"]
+paper_search = ["web/templates/*.html", "data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

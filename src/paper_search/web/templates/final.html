@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "_papers.html" as papers %}
+{% block content %}
+
+{% set selected = result.papers|selectattr('selected')|list %}
+
+<div class="panel">
+  <strong>최종 리스트</strong>
+  <span class="muted"> — 선택 {{ selected|length }}건 / 전체 {{ result.papers|length }}건 ·
+  비용 ${{ '%.3f'|format(result.cost_usd) }}</span>
+</div>
+
+{% for w in result.warnings %}<div class="warn">{{ w }}</div>{% endfor %}
+
+{% if criteria_rows %}
+<div class="panel">
+  <strong>파악된 선택 기준</strong>
+  <p class="muted" style="margin:4px 0 12px">다음 라운드의 관련도 점수화에 반영됩니다. 맞지 않는 기준은 끄십시오.</p>
+  {% for c in criteria_rows %}
+    <form method="post" action="/rounds/{{ result.round_id }}/criteria/{{ c['id'] }}"
+          style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)">
+      <span style="flex:1{% if not c['active'] %};opacity:.45;text-decoration:line-through{% endif %}">{{ c['text'] }}</span>
+      {% if c['origin'] == 'user_edited' %}<span class="chip grey">수정됨</span>{% endif %}
+      <input type="hidden" name="active" value="{{ '' if c['active'] else '1' }}">
+      <button class="ghost" type="submit">{{ '끄기' if c['active'] else '켜기' }}</button>
+    </form>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if selected %}
+  <h3 style="font-size:15px;margin:24px 0 10px">선택한 논문</h3>
+  {% for sp in selected %}{{ papers.paper_card(sp, false) }}{% endfor %}
+  <h3 style="font-size:15px;margin:24px 0 10px" class="muted">나머지</h3>
+  {% for sp in result.papers if not sp.selected %}{{ papers.paper_card(sp, false) }}{% endfor %}
+{% else %}
+  {% for sp in result.papers %}{{ papers.paper_card(sp, false) }}{% endfor %}
+{% endif %}
+
+<div class="panel"><a href="/"><button class="ghost" type="button">새 검색</button></a></div>
+{% endblock %}

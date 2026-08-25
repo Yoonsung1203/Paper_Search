@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="progress-host">
+  {% with round_id=result.round_id, running=running, status_label=status_label,
+          cost=result.cost_usd, counted=result.papers|length %}
+    {% include "_progress.html" %}
+  {% endwith %}
+</div>
+<p class="muted">검색과 요약이 끝나면 자동으로 선택 화면으로 넘어갑니다. 이 창을 닫아도 진행은 계속됩니다.</p>
+
+<script>
+  // 진행 상태를 2초마다 폴링한다. 서버가 HX-Redirect 헤더를 주면 결과 화면으로 이동.
+  const url = "/rounds/{{ result.round_id }}/progress";
+  const host = document.getElementById("progress-host");
+  async function poll() {
+    try {
+      const res = await fetch(url, { headers: { "Accept": "text/html" } });
+      const redirect = res.headers.get("HX-Redirect");
+      host.innerHTML = await res.text();
+      if (redirect) { window.location = redirect; return; }
+    } catch (e) { /* 일시적 오류는 다음 주기에 회복된다 */ }
+    setTimeout(poll, 2000);
+  }
+  setTimeout(poll, 2000);
+</script>
+{% endblock %}

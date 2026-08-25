@@ -38,6 +38,14 @@ def _build_parser() -> argparse.ArgumentParser:
     rounds = sub.add_parser("rounds", help="저장된 라운드 목록")
     rounds.add_argument("--limit", type=int, default=10)
 
+    costs = sub.add_parser("costs", help="라운드의 단계별 LLM 비용을 본다 (T2-9 실측용)")
+    costs.add_argument("round_id", type=int)
+
+    serve = sub.add_parser("serve", help="웹 UI를 띄운다 (M2)")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--reload", action="store_true")
+
     return parser
 
 
@@ -107,6 +115,46 @@ def main(argv: list[str] | None = None) -> int:
                 f"#{row['id']:>3}  {row['created_at'][:19]}  {row['status']:<18} "
                 f"${row['cost_usd']:.3f}  {row['keywords']}"
             )
+        return 0
+
+    if args.command == "costs":
+        conn = connect(settings.db_path)
+        repo = Repository(conn)
+        rows = repo.cost_breakdown(args.round_id)
+        ratio = repo.cache_hit_ratio(args.round_id)
+        total = repo.round_cost(args.round_id)
+        conn.close()
+
+        if not rows:
+            print(f"라운드 #{args.round_id}에 기록된 LLM 호출이 없습니다.")
+            return 0
+        print(f"{'단계':<12}{'호출':>6}{'입력tok':>10}{'출력tok':>10}{'캐시tok':>10}{'비용':>10}")
+        for row in rows:
+            print(
+                f"{row['stage']:<12}{row['calls']:>6}{row['input_tokens']:>10}"
+                f"{row['output_tokens']:>10}{row['cache_read_tokens']:>10}"
+                f"{row['cost_usd']:>10.4f}"
+            )
+        print(f"\n합계 ${total:.4f} · 프롬프트 캐시 적중률 {ratio:.1%}")
+        if ratio == 0.0:
+            print("⚠ 캐시 적중률이 0입니다. 시스템 프롬프트 접두부가 1,024 토큰 미만이거나")
+            print("  호출마다 달라지고 있을 수 있습니다.")
+        if total > settings.cost_cap_usd:
+            print(f"⚠ 라운드 비용이 상한(${settings.cost_cap_usd:.2f})을 넘었습니다.")
+        return 0
+
+    if args.command == "serve":
+        import uvicorn
+
+        settings.require_anthropic_key()
+        print(f"http://{args.host}:{args.port} 에서 실행합니다.")
+        uvicorn.run(
+            "paper_search.web:create_app",
+            factory=True,
+            host=args.host,
+            port=args.port,
+            reload=args.reload,
+        )
         return 0
 
     if args.command == "search":

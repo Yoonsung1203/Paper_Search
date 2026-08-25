@@ -36,6 +36,12 @@ paper-search search -k "cortex" --from 2026-08-01 --to 2026-08-25
 paper-search search -a "Kim S" --no-preprints
 
 paper-search rounds
+
+# 웹 UI (권장) — 키워드 입력부터 최종 리스트까지
+paper-search serve
+
+# 라운드의 단계별 LLM 비용
+paper-search costs 1
 ```
 
 ## 현재 상태
@@ -44,6 +50,6 @@ paper-search rounds
 | --- | --- | --- |
 | M0 | 프로젝트 골격, 설정, 도메인 모델, SQLite, CI | 완료 |
 | M1 | 검색 파이프라인 (PubMed / bioRxiv / Crossref, 중복 제거) | 완료 |
-| M2 | LLM 스크리닝 + 웹 UI (Human gate) | 예정 |
+| M2 | LLM 스크리닝 + 웹 UI (Human gate) | 완료 (비용 실측 T2-9 보류) |
 | M3 | 저널 임팩트 지표, 차별성 검증 노출 | 예정 |
 | M4 | 선택 기준 추론 및 재랭킹 | 예정 |
