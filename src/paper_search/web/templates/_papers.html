@@ -1,3 +1,9 @@
+{% set NOVELTY = {
+  'new_method': '새 방법론', 'large_data': '대규모 데이터', 'new_theory': '새 이론',
+  'clinical_impact': '임상적 파급력', 'other': '기타', 'undetermined': '판단 보류'
+} %}
+{% set CONFIDENCE = {'high': '근거 확인', 'medium': '정황 추론', 'low': '근거 불충분'} %}
+
 {% macro paper_card(sp, selectable) %}
 <div class="panel" style="padding:16px 18px">
   <div style="display:flex;gap:12px;align-items:flex-start">
@@ -10,9 +16,10 @@
         {% if sp.relevance %}<span class="chip">관련도 {{ sp.relevance.score }}</span>{% endif %}
         {% if sp.paper.is_preprint %}<span class="chip grey">preprint</span>{% endif %}
         {% if sp.metric %}
-          <span class="chip grey">{{ sp.metric.display() }}</span>
+          {# IF가 아니므로 지표명과 출처를 반드시 함께 노출한다 (PRD §6.2-2) #}
+          <span class="chip grey" title="Journal Impact Factor가 아닙니다. OpenAlex의 최근 2년 평균 피인용 수입니다.">{{ sp.metric.display() }}</span>
         {% elif not sp.paper.is_preprint %}
-          <span class="chip grey">지표 미확인</span>
+          <span class="chip grey" title="이 저널의 지표를 찾지 못했습니다. 리스트에서 제외하지는 않습니다.">지표 미확인</span>
         {% endif %}
       </div>
       <div style="font-weight:600;line-height:1.45">
@@ -30,8 +37,8 @@
         </ul>
         <div class="muted" style="font-size:13px">
           <strong>차별성:</strong> {{ sp.summary.novelty_claim or '판단 보류' }}
-          <span class="chip grey">{{ sp.summary.novelty_category }}</span>
-          <span class="chip grey">확신 {{ sp.summary.novelty_confidence }}</span>
+          <span class="chip grey">{{ NOVELTY.get(sp.summary.novelty_category, sp.summary.novelty_category) }}</span>
+          <span class="chip grey">{{ CONFIDENCE.get(sp.summary.novelty_confidence, sp.summary.novelty_confidence) }}</span>
           <span class="chip grey">근거: {{ '전문' if sp.summary.basis == 'fulltext' else '초록' }}</span>
         </div>
       {% elif sp.paper.abstract and not (sp.relevance and sp.relevance.evidence) %}
