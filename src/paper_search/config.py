@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     max_candidates: int = Field(default=200, description="LLM 점수화에 태울 최대 후보 수")
     summarize_top_n: int = Field(default=30, description="요약·차별성 검증 대상 상위 건수")
     llm_concurrency: int = Field(default=8, description="동시 LLM 호출 수")
+    backoff_base: float = Field(default=2.0, description="재시도 백오프 기준 시간(초)")
 
     def require_anthropic_key(self) -> str:
         if not self.anthropic_api_key:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Iterator
 from datetime import date
+from pathlib import Path
 
 import pytest
 
@@ -32,3 +33,16 @@ def round_input() -> RoundInput:
         date_to=date(2026, 8, 25),
         impact_threshold=10.0,
     )
+
+
+@pytest.fixture
+def fixtures_dir() -> Path:
+    return Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture
+def load_fixture(fixtures_dir: Path):  # type: ignore[no-untyped-def]
+    def _load(name: str) -> str:
+        return (fixtures_dir / name).read_text(encoding="utf-8")
+
+    return _load

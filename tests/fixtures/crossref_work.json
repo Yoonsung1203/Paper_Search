@@ -1,0 +1,16 @@
+{
+  "status": "ok",
+  "message-type": "work",
+  "message-version": "1.0.0",
+  "message": {
+    "DOI": "10.1101/2026.08.21.622222",
+    "type": "posted-content",
+    "title": ["Deep learning inference of neuronal connectivity from calcium imaging"],
+    "container-title": ["Neural Computation"],
+    "ISSN": ["0899-7667"],
+    "published": {"date-parts": [[2026, 8, 21]]},
+    "author": [{"given": "Minjae", "family": "Choi"}, {"given": "Doyeon", "family": "Yun"}],
+    "abstract": "<jats:p>We train a <jats:italic>transformer</jats:italic> to infer connectivity.</jats:p>",
+    "URL": "https://doi.org/10.1101/2026.08.21.622222"
+  }
+}
